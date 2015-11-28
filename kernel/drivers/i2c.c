@@ -195,8 +195,8 @@ static int i2c_fno_init(struct fnode *dev, uint32_t n, const struct i2c_addr * a
 	struct dev_i2c *u = &DEV_I2C[n];
 	static int num_i2cs = 0;
 
-	char name[6] = "i2c";
-	name[4] =  '0' + num_i2cs++;
+	char name[5] = "i2c";
+	name[3] =  '0' + num_i2cs++;
 
 	if (addr->base == 0)
 		return -1;

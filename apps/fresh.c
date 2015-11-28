@@ -1,10 +1,10 @@
-/*  
+/*
  *      This file is part of frosted.
  *
  *      frosted is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License version 2, as 
+ *      it under the terms of the GNU General Public License version 2, as
  *      published by the Free Software Foundation.
- *      
+ *
  *
  *      frosted is distributed in the hope that it will be useful,
  *      but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,7 +16,7 @@
  *
  *      Authors: Daniele Lacamera, Maxime Vincent
  *
- */  
+ */
 #include "frosted_api.h"
 #include "syscalls.h"
 #include <string.h>
@@ -69,7 +69,7 @@ static void ls(int ser, char *start)
             type = 'f';
         }
 
-        write(ser, &type, 1); 
+        write(ser, &type, 1);
         write(ser, "    ", 4);
         write(ser, ch_size, strlen(ch_size));
         write(ser, "\r\n", 2);
@@ -118,7 +118,7 @@ void fresh(void *arg) {
         {
             const char del = 0x08;
             int ret = read(ser, input + len, 3);
-            
+
             /* arrows */
             if ((ret == 3) && (input[len] == 0x1b)) {
                 char dir = input[len + 1];
@@ -184,7 +184,7 @@ void fresh(void *arg) {
         write(ser, "\r\n", 2);
         if (len == 0)
             break;
-        
+
         if (strlen(input) == 0)
             continue;
         /* First, check redirections */
@@ -231,8 +231,8 @@ void fresh(void *arg) {
             /* Restore space */
             if (args != NULL)
                 *(args - 1) = ' ';
-        } 
-        
+        }
+
         if (!strncmp(input, "ls", 2))
         {
             ls(out, pwd);
@@ -277,7 +277,7 @@ void fresh(void *arg) {
             }
         } else if (!strncmp(input, "touch", 5)) {
             if (strlen(input) > 5) {
-                int fd; 
+                int fd;
                 char *arg = input + 6;
                 fd = open(arg, O_CREAT|O_TRUNC|O_EXCL);
                 if (fd < 0) {
@@ -286,15 +286,26 @@ void fresh(void *arg) {
             }
         } else if (!strncmp(input, "echo", 4)) {
             if (strlen(input) > 4) {
-                int fd; 
+                int fd;
                 char *arg = input + 5;
                 write(out, arg, strlen(arg));
+                write(out, "\r\n", 2);
+            }
+        } else if (!strncmp(input, "i2c", 3)) {
+            if (strlen(input) == 3) {
+                int fd;
+                fd = open("/dev/i2c0", O_RDWR);
+                write(out, "\r\n", 2);
+                char buf[1];
+                buf[0] = 0x00;
+                read(fd, buf, 1);
+                write(out, buf, 1);
                 write(out, "\r\n", 2);
             }
         } else if (!strncmp(input, "cat", 3)) {
             if (strlen(input) > 3) {
                 char *arg = input + 4;
-                int fd; 
+                int fd;
                 fd = open(arg, O_RDONLY);
                 if (fd < 0) {
                     write(out, str_invalidfile, strlen(str_invalidfile));
