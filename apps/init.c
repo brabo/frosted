@@ -1,10 +1,10 @@
-/*  
+/*
  *      This file is part of frosted.
  *
  *      frosted is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License version 2, as 
+ *      it under the terms of the GNU General Public License version 2, as
  *      published by the Free Software Foundation.
- *      
+ *
  *
  *      frosted is distributed in the hope that it will be useful,
  *      but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,7 +16,7 @@
  *
  *      Authors: Daniele Lacamera, Maxime Vincent
  *
- */  
+ */
 #include "frosted_api.h"
 #include "fresh.h"
 #include "syscalls.h"
@@ -35,7 +35,7 @@ void task2(void *arg)
     int fdz = open("/dev/zero", O_WRONLY, 0);
     int fdm;
     int ser;
-    volatile uint32_t now; 
+    volatile uint32_t now;
     volatile int ret;
     ser = open("/dev/ttyS0", O_RDWR, 0);
     write(ser, GREETING, strlen(GREETING));
@@ -84,8 +84,8 @@ void idling(void *arg)
 # define LED2 "/dev/gpio_1_15"
 # define LED3 "/dev/gpio_1_4"
 #elif defined (STM32F4)
-# define LED0 "/dev/gpio_3_12"
-# define LED1 "/dev/gpio_3_13"
+# define LED0 "/dev/gpio_6_13"
+# define LED1 "/dev/gpio_6_14"
 # define LED2 "/dev/gpio_3_14"
 # define LED3 "/dev/gpio_3_15"
 #elif defined (LPC17XX)
@@ -162,7 +162,7 @@ void init(void *arg)
     /* open/close test */
     fd = open("/dev/null", 0, 0);
     close(fd);
-    
+
     /* socket/close test */
     sd = socket(AF_UNIX, SOCK_DGRAM, 0);
     close(sd);
@@ -197,8 +197,8 @@ void init(void *arg)
 //*****************************************************************************
 extern int main(void);
 extern unsigned int __StackTop; /* provided by linker script */
- 
- 
+
+
 //*****************************************************************************
 //
 // The following are constructs created by the linker, indicating where the
@@ -211,24 +211,24 @@ extern unsigned long apps_data;
 extern unsigned long apps_edata;
 extern unsigned long apps_bss;
 extern unsigned long apps_ebss;
- 
+
 //*****************************************************************************
 //
 // This is the code that gets called when the processor first starts execution
 // following a reset event.  Only the absolutely necessary set is performed,
-// after which the application supplied entry() routine is called. 
+// after which the application supplied entry() routine is called.
 //
 //*****************************************************************************
 void INIT _init(void)
 {
     unsigned long *pulSrc, *pulDest;
     unsigned char * bssDest;
- 
+
     //
     // Copy the data segment initializers from flash to SRAM.
     //
     pulSrc = &apps_etext;
-    pulDest = &apps_data; 
+    pulDest = &apps_data;
 
     while(pulDest < &apps_edata)
     {
@@ -247,7 +247,7 @@ void INIT _init(void)
 
     /* Set initial point for userspace memory */
     mem_init(&apps_ebss);
- 
+
     //
     // Call the application's entry point.
     //

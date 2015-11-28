@@ -1,10 +1,10 @@
-/*  
+/*
  *      This file is part of frosted.
  *
  *      frosted is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License version 2, as 
+ *      it under the terms of the GNU General Public License version 2, as
  *      published by the Free Software Foundation.
- *      
+ *
  *
  *      frosted is distributed in the hope that it will be useful,
  *      but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,7 +16,7 @@
  *
  *      Authors: Daniele Lacamera, Maxime Vincent
  *
- */  
+ */
 #include "frosted.h"
 #include "libopencm3/cm3/systick.h"
 #include <libopencm3/stm32/rcc.h>
@@ -30,6 +30,11 @@
 #ifdef CONFIG_DEVGPIO
 #include <libopencm3/stm32/gpio.h>
 #include "gpio.h"
+#endif
+
+#ifdef CONFIG_DEVI2C
+#include <libopencm3/stm32/i2c.h>
+#include "i2c.h"
 #endif
 
 #ifdef CONFIG_DEVGPIO
@@ -57,18 +62,24 @@ static const struct gpio_addr gpio_addrs[] = { {.port=GPIOG, .pin=GPIO13,.mode=G
 #ifdef CONFIG_UART_8
 #endif
 #endif
+#ifdef CONFIG_DEVI2C
+#ifdef CONFIG_I2C_3
+                                                                            {.port=GPIOA, .pin=GPIO8,.mode=GPIO_MODE_AF,.af=GPIO_AF4, .speed=GPIO_OSPEED_50MHZ, .optype=GPIO_OTYPE_OD, .pullupdown=GPIO_PUPD_NONE, .name=NULL,},
+                                                                            {.port=GPIOC, .pin=GPIO9,.mode=GPIO_MODE_AF,.af=GPIO_AF4, .speed=GPIO_OSPEED_50MHZ, .optype=GPIO_OTYPE_OD, .pullupdown=GPIO_PUPD_NONE, .name=NULL,},
+#endif
+#endif
 };
 #define NUM_GPIOS (sizeof(gpio_addrs) / sizeof(struct gpio_addr))
 #endif
 
 #ifdef CONFIG_DEVUART
-static const struct uart_addr uart_addrs[] = { 
+static const struct uart_addr uart_addrs[] = {
 #ifdef CONFIG_USART_1
-            { 
-                .devidx = 2,
-                .base = USART1, 
-                .irq = NVIC_USART1_IRQ, 
-                .rcc = RCC_USART1, 
+            {
+                .devidx = 1,
+                .base = USART1,
+                .irq = NVIC_USART1_IRQ,
+                .rcc = RCC_USART1,
                 .baudrate = 115200,
                 .stop_bits = USART_STOPBITS_1,
                 .data_bits = 8,
@@ -77,11 +88,11 @@ static const struct uart_addr uart_addrs[] = {
             },
 #endif
 #ifdef CONFIG_USART_2
-        { 
+        {
             .devidx = 2,
-            .base = USART2, 
-            .irq = NVIC_USART2_IRQ, 
-            .rcc = RCC_USART2, 
+            .base = USART2,
+            .irq = NVIC_USART2_IRQ,
+            .rcc = RCC_USART2,
             .baudrate = 115200,
             .stop_bits = USART_STOPBITS_1,
             .data_bits = 8,
@@ -92,6 +103,23 @@ static const struct uart_addr uart_addrs[] = {
 };
 #define NUM_UARTS (sizeof(uart_addrs) / sizeof(struct uart_addr))
 #endif
+
+
+#ifdef CONFIG_DEVI2C
+static const struct i2c_addr i2c_addrs[] = {
+#ifdef CONFIG_I2C_3
+            {
+                .devidx = 3,
+                .base = I2C3,
+                .rcc = RCC_I2C3,
+                .freq = I2C_CR2_FREQ_42MHZ,
+                .address = 0x41,
+            },
+#endif
+};
+#define NUM_I2CS (sizeof(i2c_addrs) / sizeof(struct i2c_addr))
+#endif
+
 
 void machine_init(struct fnode * dev)
 {
@@ -111,5 +139,6 @@ void machine_init(struct fnode * dev)
 #ifdef CONFIG_DEVUART
     uart_init(dev, uart_addrs, NUM_UARTS);
 #endif
+    i2c_init(dev, i2c_addrs, NUM_I2CS);
 }
 

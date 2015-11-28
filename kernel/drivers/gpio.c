@@ -22,7 +22,7 @@
                                                                 case GPIOJ:rcc_periph_clock_enable(RCC_GPIOJ);  break;  \
                                                                 case GPIOK:rcc_periph_clock_enable(RCC_GPIOK);  break;  \
                                                                 }
-                                                                
+
 #define SET_INPUT(P, D, I)               gpio_mode_setup(P, GPIO_MODE_INPUT, D, I);
 
 #define SET_OUTPUT(P, I, O, S)     gpio_mode_setup(P, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, I);   \
@@ -68,7 +68,7 @@ void exti15_10_isr(void)
 
 #ifdef LPC17XX
 #include <libopencm3/lpc17xx/gpio.h>
-#define GPIO_CLOCK_ENABLE(C, E) 
+#define GPIO_CLOCK_ENABLE(C, E)
 
 #define SET_INPUT(P, D, I)              gpio_mode_setup(P, GPIO_MODE_INPUT, D, I);    \
                                                                gpio_set_af(P, GPIO_AF0, I);
@@ -91,7 +91,7 @@ static struct module mod_devgpio = {
 static int gpio_check_fd(int fd, struct fnode **fno)
 {
     *fno = task_filedesc_get(fd);
-    
+
     if (!fno)
         return -1;
     if (fd < 0)
@@ -114,7 +114,7 @@ void GPIO_Handler(void)
 {
 
     /* If a process is attached, resume the process */
-    if (gpio_pid > 0) 
+    if (gpio_pid > 0)
         task_resume(gpio_pid);
 }
 
@@ -200,7 +200,7 @@ static int devgpio_poll(int fd, uint16_t events, uint16_t *revents)
     *revents = 0;
     if (events & POLLOUT) {
         *revents |= POLLOUT;
-        ret = 1; 
+        ret = 1;
     }
     if (events == POLLIN) {
         *revents |= POLLIN;
@@ -214,7 +214,7 @@ static int devgpio_open(const char *path, int flags)
     struct fnode *f = fno_search(path);
     if (!f)
         return -1;
-    return task_filedesc_add(f); 
+    return task_filedesc_add(f);
 }
 
 static struct module *  devgpio_init(struct fnode *dev)
@@ -223,7 +223,7 @@ static struct module *  devgpio_init(struct fnode *dev)
     mod_devgpio.family = FAMILY_FILE;
     strcpy(mod_devgpio.name,"gpio");
     mod_devgpio.ops.open = devgpio_open;
-    mod_devgpio.ops.read = devgpio_read; 
+    mod_devgpio.ops.read = devgpio_read;
     mod_devgpio.ops.poll = devgpio_poll;
     mod_devgpio.ops.write = devgpio_write;
     mod_devgpio.ops.ioctl = devgpio_ioctl;
@@ -248,7 +248,7 @@ void gpio_init(struct fnode * dev,  const struct gpio_addr gpio_addrs[], int num
     for(i=0;i<num_gpios;i++)
     {
         GPIO_CLOCK_ENABLE(gpio_addrs[i].port, gpio_addrs[i].exti)
-            
+
         switch(gpio_addrs[i].mode)
         {
             case GPIO_MODE_INPUT:
@@ -281,7 +281,7 @@ void gpio_init(struct fnode * dev,  const struct gpio_addr gpio_addrs[], int num
             exti_set_trigger(exti, gpio_addrs[i].trigger);
             exti_enable_request(exti);
         }
-#endif         
+#endif
         if(gpio_addrs[i].name)
         {
             node = fno_create(devgpio, gpio_addrs[i].name, dev);
