@@ -139,6 +139,8 @@ void machine_init(struct fnode * dev)
 #ifdef CONFIG_DEVUART
     uart_init(dev, uart_addrs, NUM_UARTS);
 #endif
+#ifdef CONFIG_DEVI2C
     i2c_init(dev, i2c_addrs, NUM_I2CS);
+#endif
 }
 

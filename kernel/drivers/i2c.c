@@ -10,7 +10,8 @@
 #endif
 #ifdef STM32F4
 #   include "libopencm3/stm32/i2c.h"
-#   define CLOCK_ENABLE(C)                 rcc_periph_clock_enable(C);)
+#   include "libopencm3/stm32/rcc.h"
+#   define CLOCK_ENABLE(C)                 rcc_periph_clock_enable(C);
 #endif
 #ifdef LPC17XX
 #   include "libopencm3/lpc17xx/i2c.h"
@@ -22,6 +23,7 @@ struct dev_i2c {
 	struct fnode *fno;
 	mutex_t *mutex;
 	uint16_t pid;
+	uint8_t address;
 };
 
 #define MAX_I2CS 1
@@ -101,7 +103,7 @@ static int devi2c_write(int fd, const void *buf, unsigned int len)
 
 	/* write to circular output buffer */
 
-	i2c_start(i2c->base, i2c->address, I2C_WRITE);
+	devi2c_start(i2c->base, i2c->address, I2C_WRITE);
 
 	i2c_send_data(i2c->base, reg[0]);
 
@@ -144,7 +146,7 @@ static int devi2c_read(int fd, void *buf, unsigned int len)
 //		}
 //	}
 
-	if (i2c_start(i2c->base, i2c->address, I2C_WRITE)) {
+	if (devi2c_start(i2c->base, i2c->address, I2C_WRITE)) {
 		return 0;
 	}
 	i2c_send_data(i2c->base, reg[0]);
@@ -158,7 +160,7 @@ static int devi2c_read(int fd, void *buf, unsigned int len)
 		}
 	}
 
-	i2c_start(i2c->base, reg[0], I2C_READ);
+	devi2c_start(i2c->base, reg[0], I2C_READ);
 
 	i2c_send_stop(i2c->base);
 
@@ -167,7 +169,11 @@ static int devi2c_read(int fd, void *buf, unsigned int len)
 	*((uint8_t*)buf) = (int)i2c_get_data(i2c->base);
 
 	I2C_SR1(i2c->base) &= ~I2C_SR1_AF;
-	msleep(50);
+	//msleep(50);
+	int i;
+	for (i = 0; i < 1000000; i++) {
+		__asm__("nop");
+	}
 	i2c_send_stop(i2c->base);
 
 	frosted_mutex_unlock(i2c->mutex);
@@ -200,6 +206,7 @@ static int i2c_fno_init(struct fnode *dev, uint32_t n, const struct i2c_addr * a
 	u->fno = fno_create(&mod_devi2c, name, dev);
 	u->pid = 0;
 	u->mutex = frosted_mutex_init();
+	u->address = addr->address;
 	//u->inbuf = cirbuf_create(128);
 	//u->outbuf = cirbuf_create(128);
 	u->fno->priv = u;
@@ -217,7 +224,7 @@ static struct module * devi2c_init(struct fnode *dev)
 	strcpy(mod_devi2c.name,"i2c");
 	mod_devi2c.ops.open = devi2c_open;
 	mod_devi2c.ops.read = devi2c_read;
-	mod_devi2c.ops.poll = devi2c_poll;
+	//mod_devi2c.ops.poll = devi2c_poll;
 	mod_devi2c.ops.write = devi2c_write;
 
 	/* Module initialization */

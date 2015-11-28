@@ -15,7 +15,7 @@ AS:=$(CROSS_COMPILE)as
 AR:=$(CROSS_COMPILE)ar
 CFLAGS+=-mthumb -mlittle-endian -mthumb-interwork -Ikernel/libopencm3/include -Ikernel -DCORE_M3 -Iinclude -fno-builtin -ffreestanding -DKLOG_LEVEL=6 -DSYS_CLOCK=$(SYS_CLOCK)
 PREFIX:=$(PWD)/build
-LDFLAGS:=-gc-sections -nostartfiles -ggdb -L$(PREFIX)/lib 
+LDFLAGS:=-gc-sections -nostartfiles -ggdb -L$(PREFIX)/lib
 
 #debugging
 CFLAGS+=-ggdb
@@ -24,13 +24,13 @@ CFLAGS+=-ggdb
 #CFLAGS+=-Os
 
 ASFLAGS:=-mcpu=cortex-m3 -mthumb -mlittle-endian -mthumb-interwork -ggdb
-APPS-y:= apps/init.o 
+APPS-y:= apps/init.o
 APPS-$(FRESH)+=apps/fresh.o
 
 
 OBJS-y:=kernel/systick.o
 
-# device drivers 
+# device drivers
 OBJS-$(MEMFS)+= kernel/drivers/memfs.o
 OBJS-$(XIPFS)+= kernel/drivers/xipfs.o
 CFLAGS-$(MEMFS)+=-DCONFIG_MEMFS
@@ -49,13 +49,16 @@ CFLAGS-$(SOCK_UNIX)+=-DCONFIG_SOCK_UNIX
 OBJS-$(DEVUART)+= kernel/drivers/uart.o
 CFLAGS-$(DEVUART)+=-DCONFIG_DEVUART
 
+OBJS-$(DEVI2C)+= kernel/drivers/i2c.o
+CFLAGS-$(DEVI2C)+=-DCONFIG_DEVI2C
+
 OBJS-$(DEVGPIO)+=kernel/drivers/gpio.o
 CFLAGS-$(DEVGPIO)+=-DCONFIG_DEVGPIO
 
-OBJS-$(MACH_STM32F407Discovery)+=kernel/$(BOARD)/stm32f407discovery.o 
-OBJS-$(MACH_STM32F405Pyboard)+=kernel/$(BOARD)/stm32f405pyboard.o 
-OBJS-$(MACH_STM32F4x1Discovery)+=kernel/$(BOARD)/stm32f4x1discovery.o 
-OBJS-$(MACH_STM32F429Discovery)+=kernel/$(BOARD)/stm32f429discovery.o 
+OBJS-$(MACH_STM32F407Discovery)+=kernel/$(BOARD)/stm32f407discovery.o
+OBJS-$(MACH_STM32F405Pyboard)+=kernel/$(BOARD)/stm32f405pyboard.o
+OBJS-$(MACH_STM32F4x1Discovery)+=kernel/$(BOARD)/stm32f4x1discovery.o
+OBJS-$(MACH_STM32F429Discovery)+=kernel/$(BOARD)/stm32f429discovery.o
 OBJS-$(MACH_LPC1768MBED)+=kernel/$(BOARD)/lpc1768mbed.o
 OBJS-$(MACH_SEEEDPRO)+=kernel/$(BOARD)/lpc1768mbed.o
 OBJS-$(MACH_LPC1679XPRESSO)+=kernel/$(BOARD)/lpc1769xpresso.o
@@ -126,7 +129,7 @@ kernel.elf: $(PREFIX)/lib/libkernel.a $(OBJS-y) kernel/libopencm3/lib/libopencm3
 	$(CC) -o $@   -Tkernel/$(BOARD)/$(BOARD).ld -Wl,--start-group $(PREFIX)/lib/libkernel.a $(OBJS-y) kernel/libopencm3/lib/libopencm3_$(BOARD).a -Wl,--end-group \
 		-Wl,-Map,kernel.map  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
 
-qemu: image.bin 
+qemu: image.bin
 	qemu-system-arm -semihosting -M lm3s6965evb --kernel image.bin -serial stdio -S -gdb tcp::3333
 
 qemu2: image.bin
