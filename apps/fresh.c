@@ -27,8 +27,10 @@ static const char str_invaliddir[]   = "Directory not found.\r\n";
 static const char str_invalidfile[]  = "File not found.\r\n";
 static const char str_help[]         = "Supported commands: help ls mkdir touch cat echo rm.\r\n";
 static const char str_prompt[]       = "[frosted]:";
+static const char str_tryi2c[]	     = "Trying to open i2c device..\r\n";
 
 #define FRESH_DEV "/dev/ttyS0"
+#define I2C_DEV "/dev/i2c0"
 
 static void ls(int ser, char *start)
 {
@@ -292,16 +294,19 @@ void fresh(void *arg) {
                 write(out, "\r\n", 2);
             }
         } else if (!strncmp(input, "i2c", 3)) {
-            if (strlen(input) == 3) {
+            //if (strlen(input) == 3) {
                 int fd;
-                fd = open("/dev/i2c0", O_RDWR);
+                write(out, str_tryi2c, strlen(str_tryi2c));
+                fd = open(I2C_DEV, O_RDWR);
+                //write(out, "\r\n", 2);
+                char *buf = 0x01;
+                //buf[0] = 0x01;
+                read(fd, &buf, 1);
+                buf[0] += 0x30;
+                write(out, &buf, 1);
                 write(out, "\r\n", 2);
-                char buf[1];
-                buf[0] = 0x00;
-                read(fd, buf, 1);
-                write(out, buf, 1);
-                write(out, "\r\n", 2);
-            }
+                close(fd);
+            //}
         } else if (!strncmp(input, "cat", 3)) {
             if (strlen(input) > 3) {
                 char *arg = input + 4;

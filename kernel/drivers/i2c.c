@@ -166,7 +166,7 @@ static int devi2c_read(int fd, void *buf, unsigned int len)
 
 	while (!(I2C_SR1(i2c->base) & I2C_SR1_RxNE));
 
-	*((uint8_t*)buf) = (int)i2c_get_data(i2c->base);
+	*((uint8_t*)buf) = (uint8_t)i2c_get_data(i2c->base);
 
 	I2C_SR1(i2c->base) &= ~I2C_SR1_AF;
 	//msleep(50);
